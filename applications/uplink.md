@@ -10,6 +10,9 @@
 
 UpLink enables devices without Internet to connect to Substrate and Polkadot networks. The devices connect by establishing a local mesh network, using whatever connectiviy technologies are already available. This includes Bluetooth Classic, Bluetooth Low Energy, WiFi Direct, and Infrastructure WiFi. While connecting using these technologies, devices can forward content on behalf of each other, meaning that the content hops from device to device. One or more devices on the network can function as Internet relays, enabling disconnected devices to access the ledger.
 
+![](https://user-images.githubusercontent.com/8101643/117965319-88c3ff80-b31a-11eb-84c5-8b38397ab8fe.png)
+Figure 1. Illustration of a mesh network being used to provide a given Originator with Internet access after two hops. The Backend is where transactions are processed.
+
 This submission aims at implementing an Android app that enables devices to act as requestors and proxies, in such a way that the requestor can borrow connectivity from the proxy to process transactions on a Substrate network. The app enables users to perform some actions, namely:
 
 * Query their balances;
@@ -19,7 +22,8 @@ This submission aims at implementing an Android app that enables devices to act 
 
 HypeLabs proposes a solution in which a mesh network is established between devices that connect locally over Bluetooth and WiFi. Some of such devices act as Proxies, meaning that they can be used as Internet exit points for the rest of the network. This setup enables Internet access on devices that would otherwise not have it, either because they lack the necessary data plans or coverage.
 
-TODO Network Asset
+![](https://user-images.githubusercontent.com/8101643/117962648-5fee3b00-b317-11eb-8afe-3871787c5183.png)
+Figure 2. Illustration of a mesh network composed by Mesh Nodes, and how the network can connect with the Backend for the purposes of authorization and processing transactions.
 
 A local mesh network enables an Originator to communicate with a Backend for the purposes of processing payments, by having the content hop from device to device (Mesh Nodes) until it reaches an Internet-connected Proxy. This occurs without any compromise of eavesdropping, interference, or other types of security hazards, given that none of the intermediary devices can read, interpret, modify, or forge the information exchanged.
 
@@ -55,8 +59,8 @@ The Transaction Server is a consensus network built on Substrate;
 
 A Mesh Node is a device running the UpLink App implemented for Android 6.0 that integrates the Hype SDK. These modules are separated into three logic units, being those listed as follows:
 
-TODO Achitecture asset
-Figure 3—Architecture of the UpLink App integrating the Hype SDK.
+![](https://user-images.githubusercontent.com/8101643/117962628-58c72d00-b317-11eb-8708-e003058f16e4.png)
+Figure 3. Architecture of the UpLink App integrating the Hype SDK.
 
 * The UpLink App implements all business logic. In the context of this project, that logic comprises of integrating and managing the Hype SDK, as well as encoding and decoding messages when communicating with the Relay Server;
 
@@ -80,8 +84,8 @@ The Radio Interfaces are operating system abstractions of the physical interface
 
 An Authentication Server governs access to the network by issuing and validating credentials for users in the network. This server is custom built for every deployment. In many instances, such servers already exist, and govern user logins, sessions, and other metainformation. The type of login is determined by the specific deployment, and how that login is performed is not bound by the Hype SDK in any way. In other words, implementations may use a password and email authentication pair, multi-factor authentication, or any other form of authentication that fits the project.
 
-TODO Asset
-Figure 4—Illustration of a minimum setup for an authentication server.
+![](https://user-images.githubusercontent.com/8101643/117962565-464cf380-b317-11eb-8ee7-579285589999.png)
+Figure 4. The Hype SDK is used to receive content from the mesh network, which consists of requests encoded in a custom protocol. These requests are translated by the server, resulting in direct API calls to the Substrate network.
 
 This server dictates the rules of network access governance, by being queried by the Certification Server as to which users are valid and which are not. For those users that are deemed legitimate, this server issues a one-time-use Access Token, which is then used by the device (e.g. the authenticator) to request a digital certificate from the Certification Server. This process is described in more detail in the Certification Server section.
 
@@ -89,8 +93,8 @@ This server dictates the rules of network access governance, by being queried by
 
 The Certification Server works in pair with the Authentication Server to enable devices to join the network. A device (Requestor) uses credentials (such as email and password) to authenticate against the Authentication Server. The Authentication Server validates those credentials and, in case of success, responds with an Access Token. This Access Token is passed to the Certification Server, which validates the Requestor using cryptography, and, in case of success, checks whether the Access Token is valid by querying the Authentication Server. If all credentials validate, the Certification Server issues a digital certificate, which the device (Requestor) can use to join the network. This digital certificate is securely stored on the device and used whenever the Mesh Node is looking to join the network. This process is illustrated in Figure 5.
 
-TODO Asset
-Figure 5—Sequence diagram illustrating the process of how authentication is performed by a Requestor, when querying against the Certification Server. The Authentication Server is the one to govern access.
+![](https://user-images.githubusercontent.com/8101643/117968214-db52eb00-b31d-11eb-9a1a-4d62c98e364a.png)
+Figure 5. Sequence diagram illustrating the process of how authentication is performed by a Requestor, when querying against the Certification Server. The Authentication Server is the one to govern access.
 
 #### Transaction Server
 
@@ -102,15 +106,15 @@ The Relay Server is one of the most important components of the solution because
 
 The server works by integrating the Hype SDK, effectively making it a Mesh Node that cooperates actively within the network. The Mesh Nodes send transaction requests to this unit, which leverages requests received from the mesh network through an interface with the Transaction Server, as illustrated in Figure 6. The implication for this, however, is the need to create a server port of the Hype SDK, linking the SDK’s core with the necessary native abstractions for the target environment.
 
-TODO Asset
-Figure 6—The Hype SDK Server port is used to communicate with the mesh network and the business logic interfaces all communications with the Transaction Server.
+![](https://user-images.githubusercontent.com/8101643/117968368-050c1200-b31e-11eb-816d-f0624e11f585.png)
+Figure 6. The Hype SDK Server port is used to communicate with the mesh network and the business logic interfaces all communications with the Transaction Server.
 
 The business logic for this unit consists of the implementation of a mediation protocol that receives requests from Mesh Nodes and interprets them into actual requests for the Transaction Server. In other words, this server implements an application layer protocol processor that enables the translation of requests coming from the mesh network in order to consume the Transaction Server’s API. This process is illustrated in Figure 7.
 
 The implication of this is that the business logic is designed in such a way that only a selected set of API endpoints can be consumed, protecting the server from random requests coming from Mesh Nodes or other external entities.
 
-TODO Asset
-Figure 7—The Hype SDK is used to receive content from the mesh network, which consists of requests encoded in a custom protocol. These requests are translated by the server, resulting in direct API calls to the Transaction Server.
+![](https://user-images.githubusercontent.com/8101643/117962565-464cf380-b317-11eb-8ee7-579285589999.png)
+Figure 7. The Hype SDK is used to receive content from the mesh network, which consists of requests encoded in a custom protocol. These requests are translated by the server, resulting in direct API calls to the Transaction Server.
 
 Given its centralized nature, it is imperative that this server introduces redundancy, for the purposes of scale and uptime. This means that there are several replicas of this server running simultaneously, and that the number of requests that it is capable of supporting is not bound by any constraints of scalability, effectively introducing horizontal scalability.
 
