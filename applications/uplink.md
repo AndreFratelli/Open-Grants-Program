@@ -229,11 +229,11 @@ This submission proposes the use of the grant for the development of a one-hop m
 | 0b. | Documentation | The code will be documented inline with a format that enables for quick docs generation, such as Doxygen. The project also includes a README file with general guidelines, onboarding information, and licensing. |
 | 0c. | Testing Guide | The project will have a minimum test coverage of 50%. The testing process should be described in the README file. |
 | 0d. | Article/Tutorial | The app includes an onboarding tutorial available to users, which is shown automatically on the first run. |
-| 1. | Binary | The app will be available in binary form in the Android Play Store. |
-| 2. | Tutorial | The app shows a startup tutorial to showcase functionality. |
-| 3. | Register/Login | The app enables users to register an account with given credentials. |
-| 4. | Account Management | The app enables users to query their account balances. |
-| 5. | Transactions | The app enables users to register a request for a transaction of funds. |
+| 1. | Binary | The app will be available in binary form in the Android Play Store, available to everyone in the public. It can also be built from the public repository, since the app can be used as template for other developers that wish to integrate the tecnology. |
+| 2. | Tutorial | The app shows a startup tutorial to showcase functionality. This will help users understand the gain they get, how to use the app, and the set of features. |
+| 3. | Register/Login | The app enables users to register an account with given credentials. These credentials must be registered first in the authentication server, although future versions will enable registration through the app. |
+| 4. | Account Management | The app enables users to query their account balances. This results in a direct query to the Substrate network, given the user's public address. |
+| 5. | Transactions | The app enables users to register a request for a transaction of funds, which will be sent through the mesh to the Substrate network. |
 
 ### Milestone 2 — Authorization Server
 
@@ -247,9 +247,9 @@ This submission proposes the use of the grant for the development of a one-hop m
 | 0b. | Documentation | The code will be documented inline with a format that enables for quick docs generation, such as Doxygen. The project also includes a README file with general guidelines, onboarding information, and licensing. |
 | 0c. | Testing Guide | The project will have a minimum test coverage of 50%. The testing process should be described in the README file. |
 | 0d. | Article/Tutorial | The onboarding processes will be described in the README file. |
-| 1. | Deployment Processes | The project includes a Docker file. |
-| 2. | User Management | The server includes a simple user management dashboard. |
-| 3. | Credentials Validation | The server exposes an API endpoint to query for access tokens. |
+| 1. | Deployment Processes | The project includes a Docker file to enable ease of deployment. |
+| 2. | User Management | The server includes a simple user management dashboard. This dashboard will only be available to admin users, which are configured at deployment time. Users can be added, deactivated, and removed. |
+| 3. | Credentials Validation | The server exposes an API endpoint to query for access tokens. The access token will be used during the authentication process to validate a certificate request. The Authentication Server consumes this endpoint when a device is looking for a digital certificate to join the mesh network. |
 
 ### Milestone 3 — Hype SDK Server Port
 
@@ -263,8 +263,8 @@ This submission proposes the use of the grant for the development of a one-hop m
 | 0b. | Documentation | The code will be documented inline with a format that enables for quick docs generation, such as Doxygen. The project also includes a README file with general guidelines, onboarding information, and licensing. |
 | 0c. | Testing Guide | The project will have a minimum test coverage of 50%. The testing process should be described in the README file. |
 | 0d. | Article/Tutorial | The onboarding processes will be described in the README file. |
-| 1. | Slim Down | The Hype SDK will not be available in full for the initial version, but rather only a subset of its components. |
-| 2. | Binary | The output for the build process is an SDK binary dependency that exposes an API that enables business logic to configure and manage communication links. |
+| 1. | Slim Down | The Hype SDK will not be available in full for the initial version, but rather only a subset of its components. This version will include a single driver (Bluetooth Low Energy) for Android, cryptographic processes, authentication, and one-hop mesh networking. |
+| 2. | Binary | The output for the build process is an SDK binary dependency that exposes an API that enables business logic to configure and manage communication links. This SDK can be integrated into the Relay Server to enable the server to act as a node on the network. |
 
 In future versions, the port will run as a daemon.
 
@@ -280,8 +280,8 @@ In future versions, the port will run as a daemon.
 | 0b. | Documentation | The code will be documented inline with a format that enables for quick docs generation, such as Doxygen. The project also includes a README file with general guidelines, onboarding information, and licensing. |
 | 0c. | Testing Guide | The project will have a minimum test coverage of 50%. The testing process should be described in the README file. |
 | 0d. | Article/Tutorial | The onboarding processes will be described in the README file. |
-| 1. | SDK Dependency | The Relay Server integrates the Hype SDK server port. |
-| 2. | Business Logic | The Relay Server implements the business logic to propagate requests on the Substrate network. |
+| 1. | SDK Dependency | The Relay Server integrates the Hype SDK server port, enabling it to behave as a node on the mesh network. This makes communication between the server and the devices possible under a peer-to-peer paradigm, which the Relay Server will translate into client/server calls to the Substrate network. |
+| 2. | Business Logic | The Relay Server implements the business logic to propagate requests on the Substrate network. This consists of translating requests from the mesh network (propagated in a custom protocol) into calls to the Substrate network, effectively acting as a mediator. |
 
 In future versions, the port will run as a daemon.
 
