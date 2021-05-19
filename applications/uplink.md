@@ -10,8 +10,8 @@
 
 UpLink enables devices without Internet to connect to Substrate and Polkadot networks. The devices connect by establishing a local mesh network, using whatever connectiviy technologies are already available. This includes Bluetooth Classic, Bluetooth Low Energy, WiFi Direct, and Infrastructure WiFi. While connecting using these technologies, devices can forward content on behalf of each other, meaning that the content hops from device to device. One or more devices on the network can function as Internet relays, enabling disconnected devices to access the ledger.
 
-<img src="https://user-images.githubusercontent.com/8101643/117965319-88c3ff80-b31a-11eb-84c5-8b38397ab8fe.png">
-Figure 1. Illustration of a mesh network being used to provide a given Originator with Internet access after two hops. The Backend is where transactions are processed.
+<img src="https://user-images.githubusercontent.com/8101643/118810374-b8878000-b8a3-11eb-967a-e120b174ab14.png">
+Figure 1. Illustration of a mesh network being used to provide a given Originator with access to a Substrate ledger after two hops.
 
 This submission aims at implementing an Android app that enables devices to act as requestors and proxies, in such a way that the requestor can borrow connectivity from the proxy to process transactions on a Substrate network. The app enables users to perform some actions, namely:
 
@@ -20,7 +20,7 @@ This submission aims at implementing an Android app that enables devices to act 
 
 ### Project Details
 
-HypeLabs proposes a solution in which a mesh network is established between devices that connect locally over Bluetooth and WiFi. Some of such devices act as Proxies, meaning that they can be used as Internet exit points for the rest of the network. This setup enables Internet access on devices that would otherwise not have it, either because they lack the necessary data plans or coverage.
+HypeLabs proposes a solution in which a mesh network is established between devices that connect locally over Bluetooth and WiFi. Some of such devices act as Proxies, meaning that they can be used as Internet exit points for the rest of the network. This setup enables devices without Internet to access a subset of Substrate functions, namelly to query one's own balance and to register transaction requests.
 
 <img src="https://user-images.githubusercontent.com/8101643/117962648-5fee3b00-b317-11eb-8afe-3871787c5183.png" height="250">
 Figure 2. Illustration of a mesh network composed by Mesh Nodes, and how the network can connect with the Backend for the purposes of authorization and processing transactions.
@@ -29,7 +29,7 @@ A local mesh network enables an Originator to communicate with a Backend for the
 
 The solution is thus composed of the following elements:
 
-* An Originator, as the device that has the intention of requesting a transaction or some other service from the network;
+* An Originator, as the device that has the intention of requesting a transaction or some other service from the Substrate network;
 
 * Several Mesh Nodes, giving support to the network and forwarding content on behalf of the Originator;
 
