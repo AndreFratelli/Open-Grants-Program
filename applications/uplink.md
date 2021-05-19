@@ -35,32 +35,32 @@ The solution is thus composed of the following elements:
 
 * One or more Proxy devices, being those the ones that are connected to the Internet at any given moment;
 
-* A Relay Server, a network endpoint responsible for interpreting the requests.
+* A Relay Server, a network endpoint responsible for interpreting requests to the Substrate network.
 
-The local network is governed by the Hype SDK, which maintains a mesh of devices, enabling them to forward content on behalf of each other. This network is maintained automatically, without the need for any form of user intervention, and provides all devices with secure links to the Backend.
+This network is maintained automatically, without the need for any form of user intervention, and provides all devices with secure links to the Backend.
 
 The local network observes a set of properties commonly known as autonomic or self-CHOP properties. These guarantee that the network is easy to deploy and maintain, recovers from failure, optimizes content delivery to best-case scenarios, and is protected against security breaches and hazards.
 
-Given a device with the intent of processing a transaction, it pushes an encrypted request on the network, assuming, thus, the role of an Originator. When that happens, the network relays content over multiple Mesh Nodes until it reaches any of the available Proxies. The Proxy, being in direct contact with the Backend, relays the encrypted content to a Relay Server. The Relay Server receives the content and executes the necessary instructions against the Transaction Server, effectively committing the transactions and necessary authorizations to a ledger.
+Given a device with the intent of processing a transaction, it pushes an encrypted request on the network, assuming, thus, the role of an Originator. When that happens, the network relays content over multiple Mesh Nodes until it reaches any of the available Proxies. The Proxy, being in direct contact with the Backend, relays the encrypted content to a Relay Server. The Relay Server receives the content and executes the necessary instructions against the Transaction Server, effectively committing the transactions and necessary authorizations to a Substrate network.
 
 When a transaction request occurs, the network cooperates to make it reach the Transaction Server, but also for the Transaction Server to respond back, giving indication to the Originator as to whether the transaction has succeeded.
 
 #### Components
 
-Mesh Nodes are devices running the UpLink App with an integration of the Hype SDK. Such nodes are active members of the mesh network and cooperate for Internet connectivity;
+* Mesh Nodes are devices running the UpLink App. Such nodes are active members of the mesh network and cooperate for Internet connectivity;
 
-The UpLink App is an application that communicates with the Transaction Server to authorize and commit transactions;
+* The UpLink App is an application that communicates with the Transaction Server;
 
-The Relay Server is a cloud service that mediates networking protocols between the mesh network and the Server, enabling them to communicate. It also integrates the Hype SDK;
+* The Relay Server is a cloud service that mediates networking protocols between the mesh network and the Server, enabling them to communicate;
 
-The Transaction Server is a consensus network built on Substrate;
+* The Transaction Server is a consensus network built on Substrate.
 
 #### Mesh Nodes
 
-A Mesh Node is a device running the UpLink App implemented for Android 6.0 that integrates the Hype SDK. These modules are separated into three logic units, being those listed as follows:
+A Mesh Node is a device running the UpLink App implemented for Android. These modules are separated into three logic units, being those listed as follows:
 
 <img src="https://user-images.githubusercontent.com/8101643/117962628-58c72d00-b317-11eb-8708-e003058f16e4.png" height="300">
-Figure 3. Architecture of the UpLink App integrating the Hype SDK.
+Figure 3. Architecture of the UpLink App.
 
 * The UpLink App implements all business logic. In the context of this project, that logic comprises of integrating and managing the Hype SDK, as well as encoding and decoding messages when communicating with the Relay Server;
 
