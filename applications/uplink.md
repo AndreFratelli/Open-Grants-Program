@@ -8,139 +8,126 @@
 
 ### Overview
 
-UpLink enables devices without Internet to connect to Substrate and Polkadot networks. The devices connect by establishing a local mesh network, using whatever connectiviy technologies are already available. This includes Bluetooth Classic, Bluetooth Low Energy, WiFi Direct, and Infrastructure WiFi. While connecting using these technologies, devices can forward content on behalf of each other, meaning that the content hops from device to device. One or more devices on the network can function as Internet relays, enabling disconnected devices to access the ledger.
+UpLink is a project that proposes a decentralized and infrastructure-free approach to peer-to-peer connectivity. The system establishes local mesh networks between devices, enabling them to connect directly, cooperate, and relay content on behalf of each other. By cooperating, the devices spend resources, such as bandwidth, memory, and computational power. The consumption of the device’s surplus resources, however, creates an incentive for users to not cooperate, effectively hampering the network and reducing its reliability. UpLink introduces UpLink tokens (ULX), built on Substrate, which are used to reward users for the resources that are consumed by the network. This means that people can sell their internet to others and can use their devices as relay nodes, earning tokens in return.
 
-<img src="https://user-images.githubusercontent.com/8101643/118810374-b8878000-b8a3-11eb-967a-e120b174ab14.png">
-Figure 1. Illustration of a mesh network being used to provide a given Originator with access to a Substrate ledger after two hops.
+This proposal focuses on one of the key components of that system: the creation of a binary peer-to-peer communication protocol that mimics Substrate’s API, enabling apps to communicate with Substrate without direct access to the Internet, through a proxy. This is illustrated in Figure 1, below. A given Requester is not connected to the Internet, and rather relies on a Proxy to access the ledger. The Proxy cooperates by relaying the requests and the responses, mediating the conversation between the two. The Relay Server handles the necessary cryptographic processes to decode and interpret the contents of the request, before relaying them to the Substrate Network.
 
-This submission aims at implementing an Android app that enables devices to act as requestors and proxies, in such a way that the requestor can borrow connectivity from the proxy to process transactions on a Substrate network. The app enables users to perform some actions, namely:
+![](https://user-images.githubusercontent.com/8101643/119384058-09d8aa80-bcbc-11eb-8934-7d4404a5d55c.png)
+Figure 1. Illustration of a Proxy device cooperating with a given Requester for the purposes of communicating with the Substrate Network.
 
-* Query their balances;
-* Process transactions of funds.
+It’s notable that this constitutes a relaxation of the UpLink project in many ways. In its entirety, the UpLink project proposes an incentive-based multi-hop mesh network system built on Substrate, enabling devices to communicate peer-to-peer and be rewarded for their cooperation. This project, however, proposes the much simpler non-rewarded proxy alternative, which enables disconnected devices to process transactions on a Substrate network. Furthermore, it will work as a fundamental basis for the UpLink project, enabling the team to build upon this system towards its more complex counterpart. The following key differences can be highlighted:
+
+1. The network can relay content only up to one hop, meaning that there’s no actual implementation of a mesh network;
+2. It uses only Bluetooth Low Energy, instead of other connectivity technologies commonly available on the devices;
+3. There’s no incentivization model in place, meaning that the Proxy will not be rewarded for its cooperation;
+4. The Relay Server is separate from Substrate. In the final version of this project the UpLink App and Substrate Network can communicate directly, end-to-end, by integrating the necessary decoding logic directly into Substrate;
+5. The Requester is only capable of consuming a selected subset of Substrate’s functions, namely querying account balance and processing transactions.
+
+Note: HypeLabs previously submitted an aborted proposal [here](https://github.com/w3f/Open-Grants-Program/pull/412). This new proposal is a considerable revision of that one. No information therein is relevant for the purposes of this submission.
 
 ### Project Details
 
-HypeLabs proposes a solution in which a mesh network is established between devices that connect locally over Bluetooth and WiFi. Some of such devices act as Proxies, meaning that they can be used as Internet exit points for the rest of the network. This setup enables devices without Internet to access a subset of Substrate functions, namelly to query one's own balance and to register transaction requests.
+HypeLabs proposes a solution in which two Android devices connect locally over Bluetooth Low Energy in order to enable one of them to communicate with the UpLink network. The network is built on Substrate. The devices can act either as Requesters or Proxies; the former issues requests to the Substrate network, and the latter relays those requests and mediates the conversation. The setup is thus composed of the following elements:
 
-<img src="https://user-images.githubusercontent.com/8101643/117962648-5fee3b00-b317-11eb-8afe-3871787c5183.png" height="250">
-Figure 2. Illustration of a mesh network composed by Mesh Nodes, and how the network can connect with the Backend for the purposes of authorization and processing transactions.
+* An Android app that is capable of assuming two roles:
 
-A local mesh network enables an Originator to communicate with a Backend for the purposes of processing payments, by having the content hop from device to device (Mesh Nodes) until it reaches an Internet-connected Proxy. This occurs without any compromise of eavesdropping, interference, or other types of security hazards, given that none of the intermediary devices can read, interpret, modify, or forge the information exchanged.
+    * A Requester is the device that is not connected to the Internet and has intentions of making API requests to the Substrate Network;
 
-The solution is thus composed of the following elements:
+    * A Proxy is a second device that is connected to the Internet, and connects with the Requester in order to share connectivity;
 
-* An Originator, as the device that has the intention of requesting a transaction or some other service from the Substrate network;
+* The Relay Server is a network endpoint responsible for interpreting and propagating requests made to the Substrate network;
 
-* Several Mesh Nodes, giving support to the network and forwarding content on behalf of the Originator;
+* The Substrate Network is a Substrate deployment composed of an unspecified number of nodes.
 
-* One or more Proxy devices, being those the ones that are connected to the Internet at any given moment;
+The connection between the Requester and the Proxy is maintained automatically, without the need for any form of user intervention. This connection is secured, in the sense that the Proxy is not capable of eavesdropping, interference, or any other types of security hazards. This is true because the communication link between the Requester and the Backend is fully encrypted, meaning that the Proxy is not capable of tampering with the information.
 
-* A Relay Server, a network endpoint responsible for interpreting requests to the Substrate network.
+#### Communication Protocol
+The Requester and the Relay Server communicate over a custom protocol that is mediated by the Proxy. The protocol will closely resemble Substrate’s API one-to-one, meaning that it consists of a port of Substrate’s API to a binary network protocol that can be used in a peer-to-peer communication paradigm. This will enable devices to communicate directly with each other in a similar way that they communicate with Substrate, enabling all sorts of integrations to happen.
 
-This network is maintained automatically, without the need for any form of user intervention, and provides all devices with secure links to the Backend.
+This protocol is to be designed and implemented within the context of this grant, and thus constitutes a deliverable. It is known, however, that the protocol uses a binary format for the sake of saving network bandwidth, especially when communicating over Bluetooth Low Energy, whose packet sizes are considerably small. It will also be implemented in Java, for the sake of reusability between the Android app and the Relay Server, given that the protocol must be implemented in both. For that reason, this deliverable will be in the form of a library, and can be added as a dependency to any Java project.
 
-The local network observes a set of properties commonly known as autonomic or self-CHOP properties. These guarantee that the network is easy to deploy and maintain, recovers from failure, optimizes content delivery to best-case scenarios, and is protected against security breaches and hazards.
+The protocol implements three functions, namely (1) querying a user’s balance on the Substrate network, (2) requesting the processment of a transaction between two users, and (3) the handshake for the two devices during the discovery stage. These functions are encoded differently in the protocol, meaning that each is represented through a different type of packet. With that in mind, it’s notable that each packet will include the specifications for the necessary arguments to execute the function, and thus to properly represent the Requester’s intent. The protocol will also include one additional packet for return value, which will indicate whether the function request executed successfully.
 
-Given a device with the intent of processing a transaction, it pushes an encrypted request on the network, assuming, thus, the role of an Originator. When that happens, the network relays content over multiple Mesh Nodes until it reaches any of the available Proxies. The Proxy, being in direct contact with the Backend, relays the encrypted content to a Relay Server. The Relay Server receives the content and executes the necessary instructions against the Transaction Server, effectively committing the transactions and necessary authorizations to a Substrate network.
+#### Bluetooth Low Energy Drivers
 
-When a transaction request occurs, the network cooperates to make it reach the Transaction Server, but also for the Transaction Server to respond back, giving indication to the Originator as to whether the transaction has succeeded.
+The solution uses Bluetooth Low Energy (BLE) in order to enable devices to communicate directly with each other. This includes managing the connectivity stack, such as device discovery (with automatic pairing) and buffered communications. The architecture for this is illustrated in Figure 2.
 
-#### Components
+![](https://user-images.githubusercontent.com/8101643/119358753-d8061a80-bca0-11eb-9671-e90688d9f91c.png)
+Figure 2. Architecture for the connectivity stack implemented for the Android app. The controller is shown on the left, while the model is shown on the right.
 
-* Mesh Nodes are devices running the UpLink App. Such nodes are active members of the mesh network and cooperate for Internet connectivity;
+* A Driver aggregates an Advertiser and Brower, enabling consumers to managed both in a simple way;
 
-* The UpLink App is an application that communicates with the Transaction Server;
+* The Advertiser is responsible for publishing the BLE Service on the network and actively advertising the device for it to be found by others;
 
-* The Relay Server is a cloud service that mediates networking protocols between the mesh network and the Server, enabling them to communicate;
+* The Browser scans the network for other devices matching the BLE service specification;
 
-* The Transaction Server is a consensus network built on Substrate.
+* The Adapter State Listener is a part of the controller’s lifecycle management, in the sense that it detects when the Bluetooth adapter is turned on and off, and makes the controller respond accordingly;
 
-#### Mesh Nodes
+* The Device Bridge keeps track of found devices, and keeps a registry between Provider’s and Android's own native object representation. This bridge is used to lookup devices and respond to events;
 
-A Mesh Node is a device running the UpLink App implemented for Android. These modules are separated into three logic units, being those listed as follows:
+* The BLE Service is a model specification for the Bluetooth Low Energy service, in the sense that it specifies what the service looks like and how it behaves;
 
-<img src="https://user-images.githubusercontent.com/8101643/117962628-58c72d00-b317-11eb-8708-e003058f16e4.png" height="300">
-Figure 3. Architecture of the UpLink App.
+* A Provider is an abstract representation of a device on the network;
 
-* The UpLink App implements all business logic. In the context of this project, that logic comprises of integrating and managing the Hype SDK, as well as encoding and decoding messages when communicating with the Relay Server;
+* A Connector manages the connections between two devices, and is capable of both initiating and terminating a connection;
 
-* The Hype SDK is a dependency that manages the connectivity stack, with the exception of the Application and Presentation layers;
+* A Channel is an abstract representation of the communication link, and is capable of both input and output;
 
-* The Radio Interfaces are software and hardware components exposed by the operating system for the purposes of direct-link communications, such as Bluetooth and WiFi. The Hype SDK interfaces these components with the operating system, mediating communications on behalf of the UpLink App.
+* An Input Stream reads buffered input from the Bluetooth Low Energy adapter;
 
-A full integration of the Hype SDK requires the deployment of a Certification Server and an Authentication Server for which production grade implementations already exist. With this server pair, the Hype SDK can manage network access and guarantee that only selected devices are capable of joining the network, as well as guarantee the likes of encryption and other forms of security. The Hype SDK manages four distinct layers of the connectivity stack:
+* An Output Stream writes buffered output to the Bluetooth Low Energy adapter.
 
-* The Session layer is responsible for automatically pairing the devices in links, while keeping all data securely encrypted between originators and destinations;
+This implementation consists of a Bluetooth Low Energy connectivity layer that manages the connectivity stack and all buffered I/O using native Android BLE frameworks. HypeLabs already maintains a production-grade implementation of such drivers, although those are deeply coupled with the Hype SDK, the company’s main product. For that reason, these drivers must be ported and isolated before being made available as a library dependency for other apps.
 
-* The Transport layer addresses connection recovery and network optimizations such as best-path discovery, while segmenting data and assembling it back at the destination. This layer also performs error recovery, such as path redundancy and the recovery of messages that fail delivery;
+One important aspect of this setup is the fact that, after connecting, the devices perform a handshake. This handshake constitutes a negotiation process between the two devices, with the intent of exchanging meta configurations and status information. The information includes whether the devices are connected to the Internet, for the purposes of role selection, and it’s performed every time that this status changes. This handshake is performed in accordance with the Communication Protocol.
 
-* The Network layer does path discovery, looking for Internet access when an Internet exit point is available and managing routing. This involves being aware of the network’s topology and propagating network updates, effectively implementing healing properties into the network;
+#### Android App
 
-* A Driver is the specific implementation of a given transport (e.g. Bluetooth, WiFi) for a given operating system (i.e. Android).
+![](https://user-images.githubusercontent.com/8101643/119384023-004f4280-bcbc-11eb-95ae-64f2ed0abcb8.png)
+Figure 3. Mockup for the Android app. The screen on the left enables users to see their balance and to request transactions, while the screen on the right provides verified confirmation of a transaction request.
 
-The Radio Interfaces are operating system abstractions of the physical interfaces for Bluetooth, WiFi, and Internet transports and are managed by the Hype SDK.
+The Android app enables users to manually request the implemented network functions. This app is simple in nature, since it is not the purpose of the project, but rather serves the purpose of testing and showcasing the network’s functions. Rather, other apps may implement the same functionality, simply by adding the implemented logic as a dependency, one that will be provided to the public in open source form and as a library dependency.
 
-#### Authentication Server
-
-An Authentication Server governs access to the network by issuing and validating credentials for users in the network. This server is custom built for every deployment. In many instances, such servers already exist, and govern user logins, sessions, and other metainformation. The type of login is determined by the specific deployment, and how that login is performed is not bound by the Hype SDK in any way. In other words, implementations may use a password and email authentication pair, multi-factor authentication, or any other form of authentication that fits the project.
-
-<img src="https://user-images.githubusercontent.com/8101643/117962565-464cf380-b317-11eb-8ee7-579285589999.png" height="250">
-Figure 4. The Hype SDK is used to receive content from the mesh network, which consists of requests encoded in a custom protocol. These requests are translated by the server, resulting in direct API calls to the Substrate network.
-
-This server dictates the rules of network access governance, by being queried by the Certification Server as to which users are valid and which are not. For those users that are deemed legitimate, this server issues a one-time-use Access Token, which is then used by the device (e.g. the authenticator) to request a digital certificate from the Certification Server. This process is described in more detail in the Certification Server section.
-
-#### Certification Server
-
-The Certification Server works in pair with the Authentication Server to enable devices to join the network. A device (Requestor) uses credentials (such as email and password) to authenticate against the Authentication Server. The Authentication Server validates those credentials and, in case of success, responds with an Access Token. This Access Token is passed to the Certification Server, which validates the Requestor using cryptography, and, in case of success, checks whether the Access Token is valid by querying the Authentication Server. If all credentials validate, the Certification Server issues a digital certificate, which the device (Requestor) can use to join the network. This digital certificate is securely stored on the device and used whenever the Mesh Node is looking to join the network. This process is illustrated in Figure 5.
-
-<img src="https://user-images.githubusercontent.com/8101643/117968214-db52eb00-b31d-11eb-9a1a-4d62c98e364a.png" height="400">
-Figure 5. Sequence diagram illustrating the process of how authentication is performed by a Requestor, when querying against the Certification Server. The Authentication Server is the one to govern access.
-
-#### Transaction Server
-
-The Transaction Server is a network built on Substrate. It exposes an API that requestors may consumer in order to query funds and process transactions.
+The app is written in Java and built with Gradle, as is common for Android.
 
 #### Relay Server
 
-The Relay Server is one of the most important components of the solution because it mediates communications between the Mesh Nodes and the Transaction Server. This endpoint guarantees that communications occurring within the network are end-to-end encrypted, effectively eliminating the possibility for man-in-the-middle attacks or erroneous data.
+The Relay Server receives, decodes, and interprets requests from any Requester. This process of decoding and interpreting requests can be understood as the server’s Business Logic, according to the illustration in Figure 4. For example, the Relay Server must decide what Substrate API endpoints to call and in what order. As a result of that process, the server redirects the requests to the Substrate Network, and mediates the communications with the Requester. All cryptographic challenges are forwarded between the two as well, meaning that the Relay Server is not capable of faking transactions, although it does have visibility over the operations that occur.
 
-The server works by integrating the Hype SDK, effectively making it a Mesh Node that cooperates actively within the network. The Mesh Nodes send transaction requests to this unit, which leverages requests received from the mesh network through an interface with the Transaction Server, as illustrated in Figure 6. The implication for this, however, is the need to create a server port of the Hype SDK, linking the SDK’s core with the necessary native abstractions for the target environment.
+![](https://user-images.githubusercontent.com/8101643/119384655-f2e68800-bcbc-11eb-899b-04e447623dc3.png)
+Figure 4. Architecture for the Relay Server, illustrating how a transaction request is relayed to the Substrate Network. Proxy devices query the Relay Server's API, which interprets the requests and propagates to the Substrate Network.
 
-<img src="https://user-images.githubusercontent.com/8101643/117968368-050c1200-b31e-11eb-816d-f0624e11f585.png" height="250">
-Figure 6. The Hype SDK Server port is used to communicate with the mesh network and the business logic interfaces all communications with the Transaction Server.
+The Relay Server is to be implemented as an AWS Lambda function that can be called publicly. Given that this server also integrates the Communication Protocol, it will be implemented in Java. It is also composed of a full fledged CI/CD pipeline, implying that updates to the deployment are easy to process. Given its implementation in Lambda, this server will be horizontally scalable, and capable of processing many millions of transactions per second.
 
-The business logic for this unit consists of the implementation of a mediation protocol that receives requests from Mesh Nodes and interprets them into actual requests for the Transaction Server. In other words, this server implements an application layer protocol processor that enables the translation of requests coming from the mesh network in order to consume the Transaction Server’s API. This process is illustrated in Figure 7.
-
-The implication of this is that the business logic is designed in such a way that only a selected set of API endpoints can be consumed, protecting the server from random requests coming from Mesh Nodes or other external entities.
-
-<img src="https://user-images.githubusercontent.com/8101643/117962565-464cf380-b317-11eb-8ee7-579285589999.png" height="250">
-Figure 7. The Hype SDK is used to receive content from the mesh network, which consists of requests encoded in a custom protocol. These requests are translated by the server, resulting in direct API calls to the Transaction Server.
-
-Given its centralized nature, it is imperative that this server introduces redundancy, for the purposes of scale and uptime. This means that there are several replicas of this server running simultaneously, and that the number of requests that it is capable of supporting is not bound by any constraints of scalability, effectively introducing horizontal scalability.
+In future reviews, this logic should be optionally integrated directly into Substrate, with the intent of having Substrate and off-the-grid devices communicate end-to-end, without the need for mediators. However, due to the complexity of that endeavour, the Relay Server will replace that setup for an initial version.
 
 ### Ecosystem Fit
 
-**Where and how does your project fit into the ecosystem?**
+* UpLink's mission is to ensure smartphone users can purchase Internet access from other users. No payment systems, blockchain applications, or blockchain transactions can work without being connected to the Internet;
 
-* UpLink's mission is to ensure smartphone users can purchase Internet access from other users. No payment systems, blockchain applications, and blockchain transactions can work without being connected to the Internet;
-* UpLink will allow dapps to process transactions by renting an Internet connection. In addition, other Polkadot projects can use UpLink to expand their services to regions where the Internet is unreliable or expensive. 
+* UpLink will allow dapps to process transactions by renting an Internet connection. In addition, other Substrate projects can use UpLink to expand their services to regions where the Internet is unreliable or expensive;
+
 * UpLink can help bank the unbanked by providing connectivity solutions to other De-Fi projects, ensuring the reliability of their products when they deploy in regions with low coverage.
 
-**Who is your target audience (parachain/dapp/wallet/UI developers, designers, your own user base, some dapp's user base, yourself)?**
-* Dapps and wallet apps
-* De-Fi projects 
-* App developers
+UpLink is targeted at the following audiences:
 
-**Are there any other projects similar to yours in the Substrate / Polkadot / Kusama ecosystem?**
+* Dapps and wallet apps;
+* De-Fi projects;
+* App developers.
+
+Other similar projects can be identified, namely:
+
 * https://www.helium.com/
 * https://gotenna.com/
 * https://nodle.io/
 
-**What makes us different from others?**
+UpLink can be distinguished from those projects because:
 
-* Uplink’s mobile SDK has already been tested and currently being in use by customers;
-* Hardware and Radio protocol agnostic, the SDK uses wireless technology available on the devices to form local networks;
-* Interoperable, any type of device running on different OS and can connect autonomously and form local mesh (provided that they are using the same radio protocol).
+* UpLink can run on smartphones and IoT devices. The technology utilizes any radio protocol readily available on the devices to form a local network. There is no need for any additional infrastructure hardware to maintain the network or extend internet access to offline devices. Thus making the technology radio protocol and hardware agnostic;
+
+* UpLink is interoperable, and any type of device running on different operating systems can connect autonomously to form local mesh networks, including Android, iOS, and various LoRa gateways. Operating System interoperability reduces the degree of fragmentation in the network and creates a unified network. As a result, anyone can access the Internet in the UpLink network;
+
+* All local network level connections,  encryption, and protocol management, internet sharing features are autonomous, which do not require any user intervention—making it easier to use and adopt the technology.
 
 ## Team :busts_in_silhouette:
 
@@ -149,7 +136,7 @@ Given its centralized nature, it is imperative that this server introduces redun
 * Carlos Lei Santos, CEO
 * André Francisco, CTO
 * Damaris Valero, Global Business Development
-* Aldrin D'Souza, Business Developer
+* Aldrin D'Souza, Product Manager
 * Karolina Stawinska, Head of Partnerships
 
 ### Contact
@@ -171,7 +158,7 @@ Given its centralized nature, it is imperative that this server introduces redun
 
 * Damaris Valero, Global Business Development: Damaris is a former entrepreneur with over 20 years of experience in business development. She founded a 15 year old independent production company headquartered in Miami and with offices abroad. Her fields of interest and expertise are business development and marketing strategy, with an emphasis on building and expanding companies globally. She is the author of the book “Branded Entertainment: Dealmaking Strategies & Techniques for Industry Professionals”. As a blockchain enthusiast and collaborator, she’s avid for the success of this fast growing global technology. Damaris is a builder of strategic partnerships with global and local partners, from government to telcos and companies that are looking to make a positive impact on connecting the world. Damaris is a content creator, director, writer and producer. She’s a creative leader on commissioned productions and development deals for new content ideas in multiple markets worldwide (Latin America and Europe).
 
-* Aldrin D’Souza, Business Developer: Aldrin is passionate about building impactful businesses for the Next Billion User markets. He has a background in Telecommunications Engineering. Based in Canada, his expertise in understanding the potential of mesh networks and its product-market fit started as a former product manager and business analyst at RightMesh, where he conducted a successful ICO. Through his market research, he has implemented unique business models that harness the opportunities native to mesh networking.
+* Aldrin D’Souza, Product Manager: Aldrin is passionate about building impactful businesses for the Next Billion User markets. He has a background in Telecommunications Engineering. Based in Canada, his expertise in understanding the potential of mesh networks and its product-market fit started as a former product manager and business analyst at RightMesh, where he conducted a successful ICO. Through his market research, he has implemented unique business models that harness the opportunities native to mesh networking.
 
 * Karolina Stawinska, Head of Partnerships: Karolina has eight years of HR experience sourcing innovative startups and recruiting high performance leadership teams in 52 countries. Across her career, she worked with various multinationals, the European Parliament, United Nations agencies, international NGOs and leading accelerator programs including Founders Factory, China Start and the Kairos K50. Among her HR experiences she was responsible for recruiting and supporting a community of over 1,200 successful millennial entrepreneurs at the Kairos Society. Karolina enjoys bringing multiple stakeholders together at hackathons, co-creating solutions that have the potential to push the world forward. She has organised and judged various startup competitions. Karolina is a self-starter with a passion for people and discovering young talent. She possesses strong interpersonal, teamwork and cross-cultural communication skills through direct sales and leadership positions.
 
@@ -184,34 +171,32 @@ Given its centralized nature, it is imperative that this server introduces redun
 
 ## Development Status :open_book:
 
-|        Module        |         Status        |
-|:--------------------:|:---------------------:|
-| Android App          | Templates Exist       |
-| Session Layer        | Production            |
-| Transport Layer      | Production            |
-| Network Layer        | Production            |
-| Drivers              | Production            |
-| Relay Server         | Implementation Needed |
-| Hype SDK Server Port | Implementation Needed |
-| Certification Server | Production            |
-| Authorization Server | Templates Exist       |
+|         Module         |              Status              |
+|:----------------------:|:--------------------------------:|
+| Android App            | Templates exist                  |
+| Communication Protocol | Design and implementation needed |
+| BLE Drivers            | Port needed                      |
+| Relay Server           | Implementation needed            |
 
-Some of the templates can be found on HypeLabs' [GitHub page](https://github.com/Hype-Labs). The Hype SDK can be downloaded from the [HypeLabs website](https://hypelabs.io/); the SDK is currently not open source, but the components used in the context of this project will be.
 
-More technical information regarding the Hype SDK can be found in the SDK [WhitePaper](https://hypelabs.io/documents/Hype-SDK.pdf). HypeLabs is also the holder of patent [US10959157B2](https://patents.google.com/patent/US10959157B2/).
+Some of the templates for the Android App can be found on HypeLabs' [GitHub page](https://github.com/Hype-Labs).
+
+The Communication Protocol is not yet designed, since one of the key requirements of it is that it matches closely with the Substrate API. This is an exercise that will be performed given the grant, creating as output the design and implementation for a peer-to-peer protocol that relates one-to-one with the Substrate API. For this initial implementation, only a subset of Substrate’s functions should be implemented, however.
+
+The Bluetooth Low Energy (BLE) Drivers already exist and are used by HypeLabs extensively in production environments. These drivers are a component of the Hype SDK (HypeLabs’ main product) and need to be ported as an isolated binary dependency, since the Hype SDK will not be used for this project.
 
 ## Development Roadmap :nut_and_bolt:
 
-|      Deliverable     |                                    Description                                   |
-|:--------------------:|:--------------------------------------------------------------------------------:|
-| Android App          | An Android app that implements the described functionality.                      |
-| Authorization Server | A server that performs basic authentication.                                     |
-| Hype SDK Server Port | A port of the Hype SDK for Linux.                                                |
-| Relay Server         | A server that mediates communications between the app and the Substrate network. |
+|       Deliverable      |                                       Description                                       |
+|:----------------------:|:---------------------------------------------------------------------------------------:|
+| Android App            | An Android app that implements the described functionality.                             |
+| Communication Protocol | A binary peer-to-peer network protocol that mimics Substrate’s API and I/O arguments.   |
+| BLE Drivers            | An implementation of a peer-to-peer communication framework using Bluetooth Low Energy. |
+| Relay Server           | A server that mediates communications between the app and the Substrate network.        |
 
 ### Overview
 
-This submission proposes the use of the grant for the development of a one-hop mesh network connectivity app and a relay server.
+This submission proposes the implementation of a binary peer-to-peer communication protocol that mimics Substrate’s API. This enables devices to communicate with Substrate even without Internet access, by relying on proxies.
 
 * **Total Estimated Duration:** 2945 Person Hours
 * **Full-Time Equivalent (FTE):** 6
@@ -229,29 +214,9 @@ This submission proposes the use of the grant for the development of a one-hop m
 | 0b. | Documentation | The code will be documented inline with a format that enables for quick docs generation, such as Doxygen. The project also includes a README file with general guidelines, onboarding information, and licensing. |
 | 0c. | Testing Guide | The project will have a minimum test coverage of 50%. The testing process should be described in the README file. |
 | 0d. | Article/Tutorial | The app includes an onboarding tutorial available to users, which is shown automatically on the first run. |
-| 1. | Binary | The app will be available in binary form in the Android Play Store, available to everyone in the public. It can also be built from the public repository, since the app can be used as template for other developers that wish to integrate the tecnology. |
-| 2. | Tutorial | The app shows a startup tutorial to showcase functionality. This will help users understand the gain they get, how to use the app, and the set of features. |
-| 3. | Register/Login | The app enables users to register an account with given credentials. These credentials must be registered first in the authentication server, although future versions will enable registration through the app. |
-| 4. | Account Management | The app enables users to query their account balances. This results in a direct query to the Substrate network, given the user's public address. |
-| 5. | Transactions | The app enables users to register a request for a transaction of funds, which will be sent through the mesh to the Substrate network. |
+| 1. | Binary | The app will be available in binary form in the Android Play Store, available to everyone in the public. It can also be built from the public repository, since the app can be used as a template for other developers that wish to integrate the technology. |
 
-### Milestone 2 — Authorization Server
-
-* **Estimated Duration:** 148 Person Hours
-* **FTE:** 1
-* **Costs:** $1,508 USD
-
-| Number | Deliverable | Specification |
-| -----: | ----------- | ------------- |
-| 0a. | License | MIT |
-| 0b. | Documentation | The code will be documented inline with a format that enables for quick docs generation, such as Doxygen. The project also includes a README file with general guidelines, onboarding information, and licensing. |
-| 0c. | Testing Guide | The project will have a minimum test coverage of 50%. The testing process should be described in the README file. |
-| 0d. | Article/Tutorial | The onboarding processes will be described in the README file. |
-| 1. | Deployment Processes | The project includes a Docker file to enable ease of deployment. |
-| 2. | User Management | The server includes a simple user management dashboard. This dashboard will only be available to admin users, which are configured at deployment time. Users can be added, deactivated, and removed. |
-| 3. | Credentials Validation | The server exposes an API endpoint to query for access tokens. The access token will be used during the authentication process to validate a certificate request. The Authentication Server consumes this endpoint when a device is looking for a digital certificate to join the mesh network. |
-
-### Milestone 3 — Hype SDK Server Port
+### Milestone 2 — Communication Protocol
 
 * **Estimated Duration:** 1924 Person Hours
 * **FTE:** 4
@@ -263,10 +228,22 @@ This submission proposes the use of the grant for the development of a one-hop m
 | 0b. | Documentation | The code will be documented inline with a format that enables for quick docs generation, such as Doxygen. The project also includes a README file with general guidelines, onboarding information, and licensing. |
 | 0c. | Testing Guide | The project will have a minimum test coverage of 50%. The testing process should be described in the README file. |
 | 0d. | Article/Tutorial | The onboarding processes will be described in the README file. |
-| 1. | Slim Down | The Hype SDK will not be available in full for the initial version, but rather only a subset of its components. This version will include a single driver (Bluetooth Low Energy) for Android, cryptographic processes, authentication, and one-hop mesh networking. |
-| 2. | Binary | The output for the build process is an SDK binary dependency that exposes an API that enables business logic to configure and manage communication links. This SDK can be integrated into the Relay Server to enable the server to act as a node on the network. |
+| 1. | Architecture and Design | The protocol will be designed before being implemented, implying an analysis of Substrate’s API, the design of binary packet formats, a security evaluation, and performance profiling. This delivery will be in the form of a document, including the design, the security assessment results, and the profiling results. |
+| 2. | Implementation | The implementation will be open source and available as a binary library dependency. The source code will be available on GitHub, and the distribution will be made available on HypeLabs’ website. |
 
-In future versions, the port will run as a daemon.
+### Milestone 3 — BLE Drivers
+
+* **Estimated Duration:** 148 Person Hours
+* **FTE:** 1
+* **Costs:** $1,508 USD
+
+| Number | Deliverable | Specification |
+| -----: | ----------- | ------------- |
+| 0a. | License | MIT |
+| 0b. | Documentation | The code will be documented inline with a format that enables for quick docs generation, such as Doxygen. The project also includes a README file with general guidelines, onboarding information, and licensing. |
+| 0c. | Testing Guide | The project will have a minimum test coverage of 50%. The testing process should be described in the README file. |
+| 0d. | Article/Tutorial | The onboarding processes will be described in the README file. |
+| 1. | Implementation | This deliverable consists of existing Android BLE drivers that will be ported to an isolated library dependency. The delivery will be in both source and binary form, and distributed on GitHub and HypeLabs’ website. |
 
 ### Milestone 4 — Relay Server
 
@@ -280,10 +257,7 @@ In future versions, the port will run as a daemon.
 | 0b. | Documentation | The code will be documented inline with a format that enables for quick docs generation, such as Doxygen. The project also includes a README file with general guidelines, onboarding information, and licensing. |
 | 0c. | Testing Guide | The project will have a minimum test coverage of 50%. The testing process should be described in the README file. |
 | 0d. | Article/Tutorial | The onboarding processes will be described in the README file. |
-| 1. | SDK Dependency | The Relay Server integrates the Hype SDK server port, enabling it to behave as a node on the mesh network. This makes communication between the server and the devices possible under a peer-to-peer paradigm, which the Relay Server will translate into client/server calls to the Substrate network. |
-| 2. | Business Logic | The Relay Server implements the business logic to propagate requests on the Substrate network. This consists of translating requests from the mesh network (propagated in a custom protocol) into calls to the Substrate network, effectively acting as a mediator. |
-
-In future versions, the port will run as a daemon.
+| 1. | Functions | The implementation will consist of a series of AWS Lambda functions that constitute the integration API. What functions those are will depend on the design of the Communication Protocol, since there’s a direct correlation between the API and the protocol. The functions will be available in source code form, on GitHub. |
 
 ## Future Plans
 
@@ -304,4 +278,3 @@ In future versions, the port will run as a daemon.
 ## Additional Information :heavy_plus_sign:
 
 **How did you hear about the Grants Program?** Web3 Foundation Website and personal recommendation.
-
